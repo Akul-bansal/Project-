@@ -1,5 +1,5 @@
-// room.js — Socket.io client for Focus Room
-(function(){
+// room.js — FIXED VERSION (Timer stops on end session)
+(function () {
   const socket = io();
 
   // UI refs
@@ -29,39 +29,51 @@
   let startTime = null;
   let timerInterval = null;
 
-  function setStatus(txt){ statusEl.textContent = txt; }
+  function setStatus(txt) { statusEl.textContent = txt; }
 
-  // find
-  btnFind.addEventListener("click", ()=>{
-    const name = (displayName.value || "Anon").trim().slice(0,30);
-    if(!name){ alert("Please enter a display name."); return; }
+  // -------------------------------------------------------
+  // FIND PARTNER
+  // -------------------------------------------------------
+  btnFind.addEventListener("click", () => {
+    const name = (displayName.value || "Anon").trim().slice(0, 30);
+    if (!name) { alert("Please enter a display name."); return; }
     myName = name;
+
     btnFind.disabled = true;
     btnCancel.disabled = false;
     setStatus("Searching for partner...");
+
     socket.emit("find", { name });
   });
 
-  btnCancel.addEventListener("click", ()=>{
+  btnCancel.addEventListener("click", () => {
     socket.emit("cancel");
     btnCancel.disabled = true;
     btnFind.disabled = false;
-    setStatus("Cancelled.");
+    setStatus("Cancelled searching.");
   });
 
-  // socket events
-  socket.on("status", (d) => { if(d && d.msg) setStatus(d.msg); });
+  // -------------------------------------------------------
+  // SOCKET EVENTS
+  // -------------------------------------------------------
+  socket.on("status", (d) => { if (d?.msg) setStatus(d.msg); });
 
   socket.on("matched", (d) => {
     currentRoomId = d.roomId;
     roomIdEl.textContent = currentRoomId;
-    meNameEl.textContent = myName || "You";
+    meNameEl.textContent = myName;
     peerNameEl.textContent = d.peer?.name || "Partner";
+
     setStatus("Matched! You're in a private focus room.");
+
     document.querySelector(".join-card").style.display = "none";
     roomArea.hidden = false;
+
     messagesEl.innerHTML = "";
     leaderList.innerHTML = "";
+
+    stopTimerLocal();          // ensure no leftover timer
+    roomTimer.textContent = "00:00:00";
   });
 
   socket.on("message", (m) => {
@@ -70,8 +82,8 @@
 
   socket.on("sessionStarted", (d) => {
     startTime = d.startTime;
-    startLocalTimer();
-    setStatus("Session in progress");
+    startTimerLocal();
+    setStatus("Session in progress.");
   });
 
   socket.on("leaderboard", (lb) => {
@@ -81,48 +93,133 @@
   socket.on("partnerLeft", (info) => {
     setStatus("Partner left the room.");
     renderSystemMessage(`${info.name || "Partner"} disconnected.`);
+
+    stopTimerLocal();
+    startTime = null;
+    roomTimer.textContent = "00:00:00";
   });
 
-  socket.on("disconnect", () => { setStatus("Disconnected from server."); });
+  socket.on("disconnect", () => {
+    setStatus("Disconnected from server.");
+    stopTimerLocal();
+  });
 
-  // send chat
+  // -------------------------------------------------------
+  // CHAT
+  // -------------------------------------------------------
   chatForm.addEventListener("submit", (ev) => {
     ev.preventDefault();
     const txt = (msgInput.value || "").trim();
-    if(!txt) return;
-    if(/(https?:\/\/|www\.)/i.test(txt)) { alert("Links are not allowed."); return; }
-    if(txt.length > 600) { alert("Message too long"); return; }
+    if (!txt) return;
+
+    if (/(https?:\/\/|www\.)/i.test(txt)) {
+      alert("Links are not allowed.");
+      return;
+    }
+
+    if (txt.length > 600) {
+      alert("Message too long");
+      return;
+    }
+
     socket.emit("message", { text: txt });
     msgInput.value = "";
   });
 
-  // start session
-  btnStartSession.addEventListener("click", () => { socket.emit("startSession"); });
+  // -------------------------------------------------------
+  // START SESSION
+  // -------------------------------------------------------
+  btnStartSession.addEventListener("click", () => {
+    socket.emit("startSession");
+  });
 
-  // end session (submit secs)
+  // -------------------------------------------------------
+  // END SESSION (FIXED)
+  // -------------------------------------------------------
   btnEndSession.addEventListener("click", () => {
-    if(!startTime){ alert("Session hasn't started."); return; }
+
+    if (!startTime) {
+      alert("Session hasn't started.");
+      return;
+    }
+
+    // STOP TIMER immediately
+    stopTimerLocal();
     const elapsed = Date.now() - startTime;
     const secs = Math.floor(elapsed / 1000);
+
+    // Reset local startTime so timer stays STOPPED
+    startTime = null;
+
+    roomTimer.textContent = formatMs(elapsed);
+
     socket.emit("endSession", { secs });
+
+    renderSystemMessage("You ended the session.");
     alert(`You submitted ${formatMs(elapsed)} focused time.`);
   });
 
-  // leave
+  // -------------------------------------------------------
+  // LEAVE ROOM
+  // -------------------------------------------------------
   btnLeave.addEventListener("click", () => {
     socket.emit("leave");
     cleanupLocal();
   });
 
-  // helper functions
-  function renderMessage(name, text, who){
+  // -------------------------------------------------------
+  // TIMER HELPERS
+  // -------------------------------------------------------
+  function startTimerLocal() {
+    stopTimerLocal();
+    timerInterval = setInterval(() => {
+      if (!startTime) return;
+      const elapsed = Date.now() - startTime;
+      roomTimer.textContent = formatMs(elapsed);
+    }, 500);
+  }
+
+  function stopTimerLocal() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  // -------------------------------------------------------
+  // CLEANUP
+  // -------------------------------------------------------
+  function cleanupLocal() {
+    currentRoomId = null;
+    startTime = null;
+
+    stopTimerLocal();
+    roomTimer.textContent = "00:00:00";
+
+    document.querySelector(".join-card").style.display = "block";
+    roomArea.hidden = true;
+
+    btnFind.disabled = false;
+    btnCancel.disabled = true;
+
+    messagesEl.innerHTML = "";
+    leaderList.innerHTML = "";
+
+    setStatus("Not connected.");
+  }
+
+  // -------------------------------------------------------
+  // UTIL RENDERING
+  // -------------------------------------------------------
+  function renderMessage(name, text, who) {
     const node = document.createElement("div");
     node.className = "msg " + (who === "me" ? "me" : "peer");
-    node.innerHTML = `<div class="text">${escapeHtml(text)}</div><span class="meta">${escapeHtml(name)} • ${new Date().toLocaleTimeString()}</span>`;
+    node.innerHTML =
+      `<div class="text">${escapeHtml(text)}</div>
+       <span class="meta">${escapeHtml(name)} • ${new Date().toLocaleTimeString()}</span>`;
     messagesEl.appendChild(node);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-  function renderSystemMessage(text){
+
+  function renderSystemMessage(text) {
     const node = document.createElement("div");
     node.className = "msg peer";
     node.style.opacity = "0.8";
@@ -130,36 +227,43 @@
     messagesEl.appendChild(node);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-  function renderLeaderboard(lb){
+
+  function renderLeaderboard(lb) {
     leaderList.innerHTML = "";
-    const arr = Object.keys(lb || {}).map(k=>({ id:k, name: lb[k].name || "Anon", secs: lb[k].secs || 0 }));
-    arr.sort((a,b)=>b.secs - a.secs);
-    arr.forEach(item=>{
+    const arr = Object.keys(lb || {}).map(k => ({
+      id: k,
+      name: lb[k].name || "Anon",
+      secs: lb[k].secs || 0
+    }));
+
+    arr.sort((a, b) => b.secs - a.secs);
+
+    arr.forEach(item => {
       const li = document.createElement("li");
-      li.textContent = `${item.name} — ${formatMs(item.secs*1000)}`;
+      li.textContent = `${item.name} — ${formatMs(item.secs * 1000)}`;
       leaderList.appendChild(li);
     });
   }
-  function escapeHtml(s){ return String(s).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;', '`':'&#96;'}[c])); }
-  function formatMs(ms){ const s = Math.floor(ms/1000); const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); const sec = s%60; return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`; }
 
-  function startLocalTimer(){
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(()=>{ const elapsed = Date.now() - startTime; roomTimer.textContent = formatMs(elapsed); }, 500);
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"'`]/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;',
+      '"': '&quot;', "'": '&#39;', '`': '&#96;'
+    }[c]));
   }
 
-  function cleanupLocal(){
-    currentRoomId = null; startTime = null;
-    if(timerInterval) clearInterval(timerInterval);
-    roomTimer.textContent = "00:00:00";
-    document.querySelector(".join-card").style.display = "block";
-    roomArea.hidden = true;
-    btnFind.disabled = false; btnCancel.disabled = true;
-    messagesEl.innerHTML = ""; leaderList.innerHTML = "";
-    setStatus("Not connected");
+  function formatMs(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   }
 
-  // on unload cleanup
-  window.addEventListener("beforeunload", ()=>{ socket.emit("leave"); });
+  // clean disconnect
+  window.addEventListener("beforeunload", () => {
+    socket.emit("leave");
+  });
+
   setStatus("Connected. Enter a display name and find a partner.");
 })();
