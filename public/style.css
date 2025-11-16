@@ -1,0 +1,94 @@
+/* AUTO DARK/LIGHT MODE */
+@media (prefers-color-scheme: light) {
+  body { background:#f3f4f6; color:#111; }
+  .card { background:rgba(255,255,255,0.65); color:#111; }
+}
+
+/* GLOBAL */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+body {
+  margin:0; padding:0; font-family:"Outfit",sans-serif;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  color:white;
+}
+
+/* FADE */
+.fade-in { opacity:0; animation:fade 1.1s forwards; }
+@keyframes fade { to { opacity:1; } }
+
+/* HEADER */
+.header { text-align:center; padding:30px 10px; }
+.logo { width:70px; border-radius:12px; }
+.subtitle { opacity:0.85; }
+
+/* MAIN GRID */
+.main { width:90%; max-width:1150px; margin:auto; display:grid; gap:25px; }
+
+/* CARD BASE */
+.card {
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(14px);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 0 25px rgba(0,0,0,0.25);
+  transition:.25s;
+}
+.card:hover { transform:translateY(-3px); box-shadow:0 0 35px rgba(0,255,255,0.2); }
+
+/* TIMER */
+.timer-card { text-align:center; }
+.ring-container { width:250px; height:250px; margin:auto; position:relative; }
+.progress-ring circle { fill:none; stroke-width:12; stroke-linecap:round; }
+.progress-bg { stroke:rgba(255,255,255,0.15); }
+.progress-value { stroke:#00eaff; stroke-dasharray:691; stroke-dashoffset:691; transition:.4s; }
+.timer-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:50px; color:#86e8ff; text-shadow:0 0 8px rgba(0,255,255,0.35); }
+
+/* ACTIVITY */
+.activity-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:18px; }
+
+/* WALLET */
+.connect { background:linear-gradient(135deg,#00aaff,#0099ff); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:700; cursor:pointer; transition:.25s; }
+.connect:hover { transform:translateY(-3px); box-shadow:0 0 18px rgba(0,180,255,0.3); }
+.wallet-box { margin-top:12px; background:rgba(255,255,255,0.06); padding:12px; border-radius:12px; color:#cfeeff; }
+.rate-info { font-size:14px; opacity:.8; margin-top:4px; }
+
+/* CONTROLS */
+.controls { text-align:center; }
+.btn { padding:12px 20px; margin:6px; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; }
+.start{ background:#00ffa6; color:#042d1a; } .pause{ background:#ffcc00; color:#2b2100; display:none; } .resume{ background:#00b7ff; color:#022a3a; display:none; } .end{ background:#ff4444; color:#330000; display:none; } .reset{ background:#bfa6ff; color:#22083a; }
+.primary{ background:linear-gradient(90deg,#00b7ff,#00ffa6); color:#031627; }
+
+/* SCORECARD */
+.score-card { text-align:center; display:none; }
+.score-grid { display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+.score-box { background:rgba(255,255,255,0.15); padding:18px; border-radius:12px; color:#86e8ff; transition:.25s; }
+.score-box:hover { transform:translateY(-4px); box-shadow:0 0 25px rgba(0,255,255,0.22); }
+.score-box p { font-size:24px; font-weight:600; }
+.congrats { margin-top:15px; color:#00ffa6; }
+
+/* TIPS */
+.tips-list li { margin:10px 0; font-size:18px; opacity:.9; }
+
+/* AI / NOTION / MUSIC */
+.ai-card{ margin-top:10px; }
+.ai-box{ margin-top:12px; background:rgba(255,255,255,0.06); padding:14px; border-radius:12px; }
+.ai-output{ background:rgba(0,0,0,0.28); border-radius:10px; padding:14px; color:#cfeeff; margin-bottom:12px; min-height:90px; display:flex; align-items:center; }
+.ai-btn{ background:linear-gradient(135deg,#00aaff,#00ddff); color:#fff; padding:12px 18px; border-radius:10px; font-weight:700; border:none; cursor:pointer; }
+.ai-btn:hover{ transform:translateY(-3px); box-shadow:0 0 15px rgba(0,200,255,0.3); }
+
+.notion-card{ margin-top:10px; }
+.notion-box{ margin-top:12px; background:rgba(255,255,255,0.06); padding:14px; border-radius:12px; }
+.notion-btn{ background:linear-gradient(135deg,#ffa600,#ff7b00); color:#fff; padding:12px 18px; border-radius:10px; font-weight:700; border:none; cursor:pointer; }
+.notion-btn:hover{ transform:translateY(-3px); box-shadow:0 0 15px rgba(255,180,0,0.4); }
+
+.music-card{ margin-top:10px; }
+.music-box{ margin-top:12px; background:rgba(255,255,255,0.06); padding:14px; border-radius:12px; }
+.music-text{ color:#cfeeff; margin-bottom:12px; line-height:1.5; }
+iframe{ border-radius:12px; width:100%; border:none; }
+
+/* RESPONSIVE */
+@media (max-width:650px) {
+  .timer-display { font-size:40px; }
+  .ring-container { width:150px; height:150px; }
+}
+

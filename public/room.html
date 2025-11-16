@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Focused Study Room — Match & Chat</title>
+  <link rel="stylesheet" href="/room.css" />
+</head>
+<body>
+  <main class="room-root">
+    <section class="join-card card">
+      <h1>Focused Study Room</h1>
+      <p class="lead">Match with one partner instantly. Chat only — stay focused.</p>
+
+      <label for="displayName">Display name</label>
+      <input id="displayName" placeholder="e.g. Rahul" maxlength="20" />
+
+      <div class="controls-row">
+        <button id="btnFind" class="btn primary">🔗 Find a Partner</button>
+        <button id="btnCancel" class="btn ghost" disabled>✖ Cancel</button>
+      </div>
+
+      <p id="status" class="status">Not connected</p>
+      <hr />
+      <small class="note">Matching is anonymous. Messages are lightly filtered (no links). To keep it study-only, please avoid off-topic chat.</small>
+      <p style="margin-top:10px;"><a href="/" class="btn ghost">← Back to Dashboard</a></p>
+    </section>
+
+    <section id="roomArea" class="room-area" hidden>
+      <aside class="sidebar">
+        <div class="room-info">
+          <h3>Room</h3>
+          <p id="roomId">—</p>
+          <p><strong>You:</strong> <span id="meName">—</span></p>
+          <p><strong>Partner:</strong> <span id="peerName">—</span></p>
+        </div>
+
+        <div class="leaderboard">
+          <h3>Leaderboard</h3>
+          <ol id="leaderList"></ol>
+        </div>
+
+        <div class="session-controls">
+          <button id="btnStartSession" class="btn primary">▶ Start Session</button>
+          <button id="btnEndSession" class="btn danger">⏹ End Session & Submit</button>
+          <button id="btnLeave" class="btn ghost">Leave Room</button>
+        </div>
+      </aside>
+
+      <section class="chat-panel">
+        <div class="chat-header">
+          <h2>Focus Chat</h2>
+          <div class="timer" id="roomTimer">00:00:00</div>
+        </div>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <form id="chatForm" class="chat-form">
+          <input id="msgInput" autocomplete="off" placeholder="Study message (no links)..." maxlength="300" />
+          <button class="btn" id="sendBtn" type="submit">Send</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/room.js"></script>
+</body>
+</html>

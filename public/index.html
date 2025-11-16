@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Distraction Controller — Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="header fade-in">
+    <img src="image.jpg" class="logo" alt="logo" />
+    <h1>Smart Distraction Controller</h1>
+    <p class="subtitle">Stay focused, earn tokens, and study together</p>
+  </header>
+
+  <main class="main fade-in">
+    <!-- TIMER -->
+    <section class="card timer-card">
+      <h2>Study Timer ⏱️</h2>
+      <div class="ring-container">
+        <svg class="progress-ring" width="250" height="250" viewBox="0 0 250 250">
+          <circle class="progress-bg" cx="125" cy="125" r="110"></circle>
+          <circle class="progress-value" cx="125" cy="125" r="110"></circle>
+        </svg>
+        <div id="timer" class="timer-display">00:00:00</div>
+      </div>
+      <p class="hint">Stay focused and minimize distractions 🎯</p>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="card activity-card">
+      <h2>Activity Monitor 📊</h2>
+      <div class="activity-row"><span>Tab Switches 🔁</span><span id="switchCount">0</span></div>
+      <div class="activity-row"><span>Idle Alerts 😴</span><span id="idleCount">0</span></div>
+    </section>
+
+    <!-- WALLET -->
+    <section class="card wallet-card">
+      <h2>Wallet & Earnings 💰</h2>
+      <button id="connectWallet" class="btn connect">🔗 Connect Wallet</button>
+      <div id="walletInfo" class="wallet-box" style="display:none;">
+        <p><strong>Wallet:</strong> <span id="walletAddress">Not connected</span></p>
+        <p><strong>Earnings:</strong> <span id="tokenEarnings">0 TEST</span></p>
+        <p class="rate-info">1 TEST = 1 minute of focused study</p>
+      </div>
+    </section>
+
+    <!-- CONTROLS -->
+    <div class="controls fade-in">
+      <button id="start" class="btn start">▶ Start</button>
+      <button id="pause" class="btn pause">⏸️ Pause</button>
+      <button id="resume" class="btn resume">▶ Resume</button>
+      <button id="end" class="btn end">⏹ End</button>
+      <button id="reset" class="btn reset">🔄 Reset</button>
+      <button id="joinRoom" class="btn primary" style="margin-left:12px;">🔗 Join Focus Room</button>
+    </div>
+
+    <!-- SCORECARD -->
+    <section id="box5" class="card score-card fade-in">
+      <h2>Session Scorecard 📋</h2>
+      <div class="score-grid">
+        <div class="score-box"><h3>Total Study Time</h3><p id="scoreStudy">00:00:00</p></div>
+        <div class="score-box"><h3>Break Time</h3><p id="scoreBreak">00:00:00</p></div>
+        <div class="score-box"><h3>Tab Switches</h3><p id="scoreSwitches">0</p></div>
+        <div class="score-box"><h3>Idle Alerts</h3><p id="scoreIdle">0</p></div>
+      </div>
+      <p class="congrats">Great focus session! Keep it up 🎉</p>
+    </section>
+
+    <!-- TIPS -->
+    <section class="card tips-card fade-in">
+      <h2>✨ Focus Tips</h2>
+      <ul class="tips-list">
+        <li>Keep this tab active while studying.</li>
+        <li>The timer pauses automatically on tab switch.</li>
+        <li>Move your mouse occasionally to avoid idle alerts.</li>
+      </ul>
+    </section>
+
+    <!-- GEMINI -->
+    <section class="card ai-card">
+      <h2>🤖 Doubt Solver</h2>
+      <div class="ai-box">
+        <div class="ai-output">Open Google Gemini in a new tab. This will not be counted as a tab switch.</div>
+        <div class="ai-input-row">
+          <button id="openGemini" class="btn ai-btn">Open Google Gemini</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTION -->
+    <section class="card notion-card">
+      <h2>📝 Summarise My Notes</h2>
+      <div class="notion-box">
+        <p class="notion-text">Open Notion to organise or summarise your notes. This will NOT count as a tab-switch.</p>
+        <button id="openNotion" class="btn notion-btn">Open Notion</button>
+      </div>
+    </section>
+
+    <!-- SPOTIFY EMBED -->
+    <section class="card music-card">
+      <h2>🎵 Soothing Music</h2>
+      <div class="music-box">
+        <p class="music-text">Enjoy calm background music while studying.</p>
+        <iframe 
+          style="border-radius:12px"
+          src="https://open.spotify.com/embed/playlist/37i9dQZF1DWXLeA8Omikj7"
+          width="100%" height="352" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+        </iframe>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ethers.js + socket.io client available on room page only -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.6.0/ethers.umd.min.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>
